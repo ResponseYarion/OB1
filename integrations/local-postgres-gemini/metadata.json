@@ -1,0 +1,20 @@
+{
+  "name": "Local PostgreSQL + Gemini Setup",
+  "description": "Run Open Brain with a free local PostgreSQL + pgvector database and Gemini-based embeddings and metadata extraction.",
+  "category": "integrations",
+  "author": {
+    "name": "Codex",
+    "github": "openai"
+  },
+  "version": "1.0.0",
+  "requires": {
+    "open_brain": true,
+    "services": ["PostgreSQL", "pgvector", "Gemini API"],
+    "tools": ["Docker Desktop"]
+  },
+  "tags": ["local", "postgresql", "pgvector", "gemini", "self-hosted", "docker", "free-tier"],
+  "difficulty": "intermediate",
+  "estimated_time": "20 minutes",
+  "created": "2026-04-15",
+  "updated": "2026-04-15"
+}

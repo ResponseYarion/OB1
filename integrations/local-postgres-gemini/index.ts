@@ -569,6 +569,93 @@ server.registerTool(
   }
 );
 
+server.registerTool(
+  "delete_thought",
+  {
+    title: "Delete Thought",
+    description:
+      "Delete one specific thought by UUID. Use only when the user explicitly asks to remove a particular thought.",
+    inputSchema: {
+      thought_id: z.string().uuid().describe("UUID of the thought to delete"),
+    },
+  },
+  async ({ thought_id }) => {
+    try {
+      const client = await pool.connect();
+      try {
+        const result = await client.queryObject<{ id: string }>(
+          `DELETE FROM thoughts
+           WHERE id = $1
+           RETURNING id`,
+          [thought_id]
+        );
+
+        if (!result.rows.length) {
+          return {
+            content: [{ type: "text" as const, text: `No thought found with ID ${thought_id}.` }],
+          };
+        }
+
+        return {
+          content: [{ type: "text" as const, text: `Deleted thought ${thought_id}.` }],
+        };
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      return {
+        content: [{ type: "text" as const, text: `Error: ${(error as Error).message}` }],
+        isError: true,
+      };
+    }
+  }
+);
+
+server.registerTool(
+  "clear_thoughts",
+  {
+    title: "Clear All Thoughts",
+    description:
+      "Delete every thought in the database. This is a destructive admin-only tool and requires explicit confirmation.",
+    inputSchema: {
+      confirm: z.literal("CLEAR ALL THOUGHTS").describe("Type CLEAR ALL THOUGHTS to confirm"),
+    },
+  },
+  async () => {
+    try {
+      const client = await pool.connect();
+      try {
+        const deletedResult = await client.queryObject<{ deleted_count: number }>(
+          `WITH deleted AS (
+             DELETE FROM thoughts
+             WHERE id IS NOT NULL
+             RETURNING 1
+           )
+           SELECT COUNT(*)::int AS deleted_count FROM deleted`
+        );
+        const deletedCount = deletedResult.rows[0]?.deleted_count || 0;
+
+        if (deletedCount === 0) {
+          return {
+            content: [{ type: "text" as const, text: "No thoughts to clear." }],
+          };
+        }
+
+        return {
+          content: [{ type: "text" as const, text: `Deleted ${deletedCount} thought(s).` }],
+        };
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      return {
+        content: [{ type: "text" as const, text: `Error: ${(error as Error).message}` }],
+        isError: true,
+      };
+    }
+  }
+);
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":

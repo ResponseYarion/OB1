@@ -117,12 +117,16 @@ $body = '{"jsonrpc":"2.0","method":"tools/list","id":1}'
 Invoke-WebRequest -Uri "http://localhost:8000" -Method POST -Headers $headers -Body $body
 ```
 
-You should see the four tools:
+You should see the six tools:
 
 - `search_thoughts`
 - `list_thoughts`
 - `thought_stats`
 - `capture_thought`
+- `delete_thought`
+- `clear_thoughts`
+
+The last two are admin cleanup tools. `clear_thoughts` requires an explicit `CLEAR ALL THOUGHTS` confirmation.
 
 ### 4. Connect your MCP client
 
